@@ -8,7 +8,7 @@ import keras
 from keras.datasets import reuters
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation
-from keras.preprocessing.text import Tokenizer
+# from keras.preprocessing.text import Tokenizer # <- Module not working on Keras 3 
 
 max_words = 1000
 batch_size = 32
@@ -23,10 +23,26 @@ print(len(x_test), 'test sequences')
 num_classes = np.max(y_train) + 1
 print(num_classes, 'classes')
 
+# # The Tokenizer module is not available in Keras 3, so we will use an alternative method to vectorize the sequences
+# print('Vectorizing sequence data...')
+# tokenizer = Tokenizer(num_words=max_words)
+# x_train = tokenizer.sequences_to_matrix(x_train, mode='binary')
+# x_test = tokenizer.sequences_to_matrix(x_test, mode='binary')
+
+# Replace the Tokenizer lines with this manual approach:
 print('Vectorizing sequence data...')
-tokenizer = Tokenizer(num_words=max_words)
-x_train = tokenizer.sequences_to_matrix(x_train, mode='binary')
-x_test = tokenizer.sequences_to_matrix(x_test, mode='binary')
+def sequences_to_matrix(sequences, num_words):
+    """Manual implementation of binary mode matrix conversion"""
+    matrix = np.zeros((len(sequences), num_words))
+    for i, seq in enumerate(sequences):
+        for word_index in seq:
+            if word_index < num_words:  # Only consider words within vocab size
+                matrix[i, word_index] = 1
+    return matrix
+
+x_train = sequences_to_matrix(x_train, max_words)
+x_test = sequences_to_matrix(x_test, max_words)
+
 print('x_train shape:', x_train.shape)
 print('x_test shape:', x_test.shape)
 
